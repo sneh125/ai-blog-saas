@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only access their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Admin can read all users
+      allow read: if request.auth != null && request.auth.token.email == 'snehprajapati36@gmail.com';
+    }
+    
+    // Users can only access their own blogs
+    match /blogs/{blogId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      // Admin can read all blogs
+      allow read: if request.auth != null && request.auth.token.email == 'snehprajapati36@gmail.com';
+    }
+    
+    // Affiliate system collections
+    match /affiliates/{affiliateId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /affiliateClicks/{clickId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /affiliateConversions/{conversionId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Payment records
+    match /payments/{paymentId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to read/write their own data
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
